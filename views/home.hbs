@@ -1,9 +1,10 @@
-<h1>get it posted</h1>
-
+ 
 {{#each adverts}}
     <div class="box">
+      <a href="/advert/{{ _id }}">
         <h4>{{title}}</h4>
         <p>{{description}}</p>
-        <small>{{location}}</small>
-    </div>
-{{/each}}
+        <small>In {{location}} at {{creationDate}}</small>
+      </a>
+    </div> 
+ {{/each}}

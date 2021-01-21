@@ -1,23 +1,39 @@
 const express = require("express");
 const path = require("path");
-const AdvertModel = require("./models/advert");
+const Advert = require("./models/advert");
 const mongoose = require("mongoose");
+
 const app = express();
 
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "hbs");
 
 // Make express parse request bodies
-//app.use(express.urlencoded());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
 
 app.get("/", (req, res) => {
-  //Querry the database for every advert
-  AdvertModel.find().then((adverts) => {
-    res.render("home", { adverts: adverts });
-  });
+  // Query the database for every advert
+  Advert.find()
+    .sort({ creationDate: -1 })
+    .then((adverts) => {
+      // Render home view and pass it adverts
+      res.render("home", { adverts: adverts });
+    })
+    .catch((error) => {
+      res.render("error");
+    });
+});
 
-  //Render home view and pass it adverts
+app.get("/advert/:id", (req, res) => {
+  const id = req.params.id;
+  Advert.findById(id)
+    .then((advert) => {
+      res.render("single", { advert: advert });
+    })
+    .catch((error) => {
+      res.render("error");
+    });
 });
 
 app.get("/create", (req, res) => {
@@ -25,18 +41,27 @@ app.get("/create", (req, res) => {
 });
 
 app.post("/create", (req, res) => {
-  // get info that user submitted in the form
+  // Get submission...
   const data = req.body;
   console.log(data);
-  // save to database...
-  AdvertModel.create({
+
+  // Save it to the database...
+  Advert.create({
     title: data.title,
     description: data.description,
     location: data.location
-  }).then(() => {
-    res.redirect("/");
-    // redirect the user to home
-  });
+  })
+    .then(() => {
+      // Redirect the user to the homepage...
+      res.redirect("/");
+    })
+    .catch((error) => {
+      res.render("error");
+    });
+});
+
+app.get("*", (req, res) => {
+  res.render("error");
 });
 
 mongoose
